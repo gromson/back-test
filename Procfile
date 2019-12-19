@@ -1,1 +1,1 @@
-web: ./bin/public --addr=$PORT
+web: ./bin/public --addr=:$PORT
