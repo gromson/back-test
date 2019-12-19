@@ -1,0 +1,130 @@
+package message
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
+	"time"
+)
+
+const (
+	defaultTimeout    = 2 * time.Second
+	messageCollection = "messages"
+)
+
+// Storage service for working with messages
+type Storage struct {
+	client *mongo.Client
+	dbName string
+}
+
+func NewStorage(client *mongo.Client, dbName string) *Storage {
+	return &Storage{
+		client: client,
+		dbName: dbName,
+	}
+}
+
+// Get retrieves a message from a storage by its id
+func (s *Storage) Get(id uuid.UUID) (*Message, error) {
+	msg := &Message{}
+
+	c := s.client.Database(s.dbName).Collection(messageCollection)
+
+	ctx, cancel := newCtxWithTimeout(defaultTimeout)
+	defer cancel()
+
+	err := c.FindOne(ctx, bson.M{"uuid": id}).Decode(msg)
+
+	if err == mongo.ErrNoDocuments {
+		return msg, fmt.Errorf("message \"%s\" doesn't exists", id)
+	}
+
+	if err != nil {
+		return msg, fmt.Errorf("error while getting a message: %w", err)
+	}
+
+	return msg, nil
+}
+
+// Fetch fetches all messages from a storage. Latest messages from in the beginning
+func (s *Storage) Fetch() ([]*Message, error) {
+	msgs := make([]*Message, 0, 100)
+
+	c := s.client.Database(s.dbName).Collection(messageCollection)
+
+	ctx, cancel := newCtxWithTimeout(defaultTimeout)
+	defer cancel()
+
+	cur, err := c.Find(ctx, bson.M{})
+
+	if err != nil && err != mongo.ErrNoDocuments {
+		return msgs, fmt.Errorf("error while trying to fetch all messages: %w", err)
+	}
+
+	if cur == nil {
+		return msgs, errors.New("mongodb cursor is nil")
+	}
+
+	for cur.Next(context.Background()) {
+		var msg *Message
+
+		if err := cur.Decode(msg); err != nil {
+			return msgs, fmt.Errorf("error while decoding messgae: %w", err)
+		}
+
+		msgs = append(msgs, msg)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Print("mongodb cursor error:" + err.Error())
+	}
+
+	if err := cur.Close(context.Background()); err != nil {
+		log.Print("error while closing the mongodb cursor:" + err.Error())
+	}
+
+	return msgs, nil
+}
+
+// Insert inserts new message into a storage
+func (s *Storage) Insert(m *Message) error {
+	c := s.client.Database(s.dbName).Collection(messageCollection)
+
+	ctx, cancel := newCtxWithTimeout(defaultTimeout)
+	defer cancel()
+
+	_, err := c.InsertOne(ctx, m)
+
+	if err != nil {
+		return fmt.Errorf("error while adding a message: %w", err)
+	}
+
+	return nil
+}
+
+// Edit modifies the message by given ID. Nil fields will be ignored
+func (s *Storage) Edit(id uuid.UUID, text string) error {
+	c := s.client.Database(s.dbName).Collection(messageCollection)
+
+	update := bson.D{{"text", text}}
+
+	ctx, cancel := newCtxWithTimeout(defaultTimeout)
+	defer cancel()
+
+	_, err := c.UpdateOne(ctx, bson.M{"uuid": id}, update)
+
+	if err != nil {
+		return fmt.Errorf("error while adding a message: %w", err)
+	}
+
+	return nil
+}
+
+func newCtxWithTimeout(timeout time.Duration) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), timeout)
+}
