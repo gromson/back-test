@@ -1,1 +1,1 @@
-web: ./bin/private --addr=:$PORT
+web: go install back-api/cmd/private && ./bin/private --addr=:$PORT
