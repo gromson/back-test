@@ -9,5 +9,4 @@ deploy:
     public: romson-back-public-api
     private: romson-back-private-api
   on:
-    repo: gromson/back-test
     all_branches: true
