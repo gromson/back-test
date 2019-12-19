@@ -2,7 +2,7 @@ package server
 
 import (
 	"back-api/internal/server/public"
-	http2 "back-api/pkg/http"
+	http_ext "back-api/pkg/http"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
@@ -20,7 +20,7 @@ func (s *Public) Run(addr string) {
 	r.PanicHandler = panicHandler
 
 	r.GET("/", func(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-		success := http2.NewJsonSuccess(struct{ Status string }{Status: "public server is running"})
+		success := http_ext.NewJsonSuccess(struct{ Status string }{Status: "public server is running"})
 		success.Respond(w, req)
 	})
 	r.POST("/message", public.AddMessageHandle())
