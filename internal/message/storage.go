@@ -22,11 +22,19 @@ type Storage struct {
 	dbName string
 }
 
-func NewStorage(client *mongo.Client, dbName string) *Storage {
+func NewStorage(client *mongo.Client, dbName string) (*Storage, error) {
+	if client == nil {
+		return nil, errors.New("mongodb client hasn't been provided")
+	}
+
+	if dbName == "" {
+		return nil, errors.New("db name hasn't been provided")
+	}
+
 	return &Storage{
 		client: client,
 		dbName: dbName,
-	}
+	}, nil
 }
 
 // Get retrieves a message from a storage by its id
@@ -111,12 +119,10 @@ func (s *Storage) Insert(m *Message) error {
 func (s *Storage) Edit(id uuid.UUID, text string) error {
 	c := s.client.Database(s.dbName).Collection(messageCollection)
 
-	update := bson.D{{"text", text}}
-
 	ctx, cancel := newCtxWithTimeout(defaultTimeout)
 	defer cancel()
 
-	_, err := c.UpdateOne(ctx, bson.M{"uuid": id}, update)
+	_, err := c.UpdateOne(ctx, bson.M{"uuid": id}, bson.M{"text": text})
 
 	if err != nil {
 		return fmt.Errorf("error while adding a message: %w", err)
