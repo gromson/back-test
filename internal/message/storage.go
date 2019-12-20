@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"time"
 )
@@ -68,7 +69,7 @@ func (s *Storage) Fetch() ([]*Message, error) {
 	ctx, cancel := newCtxWithTimeout(defaultTimeout)
 	defer cancel()
 
-	cur, err := c.Find(ctx, bson.M{})
+	cur, err := c.Find(ctx, bson.M{}, options.Find().SetSort(bson.M{"creation_time": -1}))
 
 	if err != nil && err != mongo.ErrNoDocuments {
 		return msgs, fmt.Errorf("error while trying to fetch all messages: %w", err)
@@ -79,7 +80,7 @@ func (s *Storage) Fetch() ([]*Message, error) {
 	}
 
 	for cur.Next(context.Background()) {
-		var msg *Message
+		msg := new(Message)
 
 		if err := cur.Decode(msg); err != nil {
 			return msgs, fmt.Errorf("error while decoding messgae: %w", err)

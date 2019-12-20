@@ -8,12 +8,13 @@ import (
 	"net/http"
 )
 
-func parsePayloadOrRespond(w http.ResponseWriter, r *http.Request, s interface{}) {
+// parsePayloadOrRespond tries to parse a payload and populate given s interface
+func parsePayloadOrRespond(w http.ResponseWriter, r *http.Request, s interface{}) bool {
 	payload, err := getPayload(r)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return false
 	}
 
 	if len(payload) == 0 {
@@ -22,7 +23,7 @@ func parsePayloadOrRespond(w http.ResponseWriter, r *http.Request, s interface{}
 			"The body of the response does not contain the data: "+string(payload),
 		)
 		problem.Respond(w, r)
-		return
+		return false
 	}
 
 	if err := json.Unmarshal(payload, s); err != nil {
@@ -36,10 +37,13 @@ func parsePayloadOrRespond(w http.ResponseWriter, r *http.Request, s interface{}
 
 		problem := NewProblem("Request payload has an invalid format", detail)
 		problem.Respond(w, r)
-		return
+		return false
 	}
+
+	return true
 }
 
+// getPayload returns request payload as a byte slice
 func getPayload(r *http.Request) ([]byte, error) {
 	payload, err := ioutil.ReadAll(r.Body)
 
