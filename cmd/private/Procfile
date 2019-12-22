@@ -1,1 +1,1 @@
-web: ./bin/private --addr=:$PORT --import=./data/import.csv
+web: ./bin/private --addr=:$PORT --import=$IMPORT_FILE
