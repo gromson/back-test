@@ -41,6 +41,14 @@ func (s *Public) addMessageHandle() httprouter.Handle {
 		creationTime := time.Now()
 		msg.CreationTime = &creationTime
 
+		errs := validateMessage(msg)
+
+		if len(errs) > 0 {
+			problem := NewProblem("Wrong data provided", errs)
+			problem.Respond(w, req)
+			return
+		}
+
 		if err := s.storage.Insert(msg); err != nil {
 			log.Println("error while trying to insert a message into a storage: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
