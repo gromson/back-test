@@ -15,9 +15,11 @@ const (
 )
 
 var addr string
+var filename string
 
 func init() {
 	flag.StringVar(&addr, "addr", ":80", "http service address")
+	flag.StringVar(&filename, "import", "", "file to import messages")
 	flag.Parse()
 }
 
@@ -32,6 +34,12 @@ func main() {
 
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if filename != "" {
+		if err = msgStorage.Import(filename); err != nil {
+			log.Fatalf("messages import failed: %s", err)
+		}
 	}
 
 	s := server.NewPrivateServer(msgStorage)
