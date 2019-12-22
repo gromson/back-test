@@ -46,6 +46,10 @@ type problem struct {
 }
 
 func NewProblem(title string, detail interface{}) Response {
+	if errs, ok := detail.([]error); ok {
+		detail = errorSliceToStringSlice(errs)
+	}
+
 	return &problem{
 		Type:   "https://tools.ietf.org/html/rfc7231#section-6.5.1",
 		Title:  title,
@@ -72,4 +76,14 @@ func (r *problem) Respond(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func errorSliceToStringSlice(data []error) []string {
+	ss := make([]string, 0, len(data))
+
+	for _, e := range data {
+		ss = append(ss, e.Error())
+	}
+
+	return ss
 }
