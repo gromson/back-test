@@ -78,6 +78,27 @@ func (r *problem) Respond(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+type unauthorized struct {
+	problem
+}
+
+func NewUnauthorizedResponse(detail string) Response {
+	problem := problem{
+		Type:   "https://tools.ietf.org/html/rfc7235#section-3.1",
+		Title:  "Unauthorized",
+		Status: http.StatusUnauthorized,
+		Detail: detail,
+	}
+
+	return &unauthorized{
+		problem,
+	}
+}
+
+func (r *unauthorized) Respond(w http.ResponseWriter, req *http.Request) {
+	r.problem.Respond(w, req)
+}
+
 func errorSliceToStringSlice(data []error) []string {
 	ss := make([]string, 0, len(data))
 

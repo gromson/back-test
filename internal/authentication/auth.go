@@ -14,7 +14,7 @@ type AuthenticationData interface {
 
 // AuthStorage interface returning a authData
 type AuthStorage interface {
-	// GetByEmail returns an interface that could be casted to AuthenticationData interface
+	// GetAuthenticationDataByEmail returns an interface that could be casted to AuthenticationData interface
 	GetAuthenticationDataByEmail(email string) (AuthenticationData, error)
 }
 

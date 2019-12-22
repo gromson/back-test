@@ -8,23 +8,33 @@ import (
 	"net/http"
 )
 
-type Private struct {
-	storage Storage
+type Authenticator interface {
+	Authenticate(email, password string) (uuid.UUID, error)
 }
 
-func NewPrivateServer(storage Storage) *Private {
-	return &Private{storage: storage}
+type Private struct {
+	storage Storage
+	auth Authenticator
+}
+
+func NewPrivateServer(storage Storage, auth Authenticator) *Private {
+	return &Private{
+		storage: storage,
+		auth: auth,
+	}
 }
 
 func (s *Private) Run(addr string) {
 	r := NewRouter()
 	r.PanicHandler = panicHandler
 
-	r.GET("/", privateRootHandle)
-	r.GET("/messages", s.fetchHandle())
-	r.GET("/messages/:id", s.getMessageHandle())
-	r.PUT("/messages/:id", s.updateHandle())
+	auth := r.NewGroup()
+	auth.AddMiddleware(s.authMiddleware())
 
+	auth.GET("/", privateRootHandle)
+	auth.GET("/messages", s.fetchHandle())
+	auth.GET("/messages/:id", s.getMessageHandle())
+	auth.PUT("/messages/:id", s.updateHandle())
 
 	log.Fatalf("server listen and serve error: %s", http.ListenAndServe(addr, r))
 }
@@ -95,7 +105,49 @@ func (s *Private) updateHandle() httprouter.Handle {
 	}
 }
 
+func (s *Private) authMiddleware() Middleware {
+	return func(next httprouter.Handle) httprouter.Handle {
+		return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+			user, password, ok := req.BasicAuth()
+
+			if !ok {
+				basicAuthHeaderFailed(w, req)
+				return
+			}
+
+			id, err := s.auth.Authenticate(user, password)
+
+			if err != nil {
+				authFailed(w, req, err)
+				return
+			}
+
+			req.Header.Set("User-ID", id.String())
+
+			next(w, req, params)
+		}
+	}
+}
+
 func privateRootHandle(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	success := NewJsonSuccess(struct{ Status string }{Status: "private server is running"})
 	success.Respond(w, req)
+}
+
+func basicAuthHeaderFailed(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(
+		"WWW-Authenticate",
+		`Basic realm="Wrong data provided", error="invalid_request", error_description="Could not get user and password data"`,
+	)
+	unauthorized := NewUnauthorizedResponse("Could not get user and password data")
+	unauthorized.Respond(w, r)
+}
+
+func authFailed(w http.ResponseWriter, r *http.Request, err error) {
+	w.Header().Set(
+		"WWW-Authenticate",
+		`Basic realm="API", error="invalid_token", error_description="Username and password are not match"`,
+	)
+	unauthorized := NewUnauthorizedResponse(err.Error())
+	unauthorized.Respond(w, r)
 }

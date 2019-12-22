@@ -44,7 +44,7 @@ func NewStorage(client *mongo.Client, dbName string) (*Storage, error) {
 
 // Get retrieves a message from a storage by its id
 func (s *Storage) Get(id uuid.UUID) (*Message, error) {
-	msg := &Message{}
+	msg := new(Message)
 
 	c := s.client.Database(s.dbName).Collection(messageCollection)
 

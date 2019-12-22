@@ -1,16 +1,19 @@
 package main
 
 import (
+	"back-api/internal/authentication"
 	"back-api/internal/message"
+	"back-api/internal/password"
 	"back-api/internal/server"
 	"back-api/internal/storage"
+	"back-api/internal/user"
 	"flag"
 	"log"
 	"os"
 )
 
 const (
-	EnvMongoUri = "MONGODB_URI"
+	EnvMongoUri    = "MONGODB_URI"
 	EnvMongoDbName = "MONGODB_DBNAME"
 )
 
@@ -42,6 +45,14 @@ func main() {
 		}
 	}
 
-	s := server.NewPrivateServer(msgStorage)
+	authStorage, err := user.NewStorage(mongoClient, os.Getenv(EnvMongoDbName))
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	auth := authentication.NewAuth(authStorage, password.NewPasswordService())
+
+	s := server.NewPrivateServer(msgStorage, auth)
 	s.Run(addr)
 }
