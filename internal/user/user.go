@@ -1,11 +1,14 @@
 package user
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type user struct {
-	ID       uuid.UUID `bson:"uuid"`
-	Name     string    `bson:"name"`
-	Password []byte    `bson:"password"`
+	ID       primitive.Binary `bson:"uuid"`
+	Name     string           `bson:"name"`
+	Password []byte           `bson:"password"`
 }
 
 // GetPasswordHash returns clients's hashed password
@@ -15,5 +18,6 @@ func (c *user) GetPasswordHash() []byte {
 
 // GetID returns clients's ID
 func (c *user) GetID() uuid.UUID {
-	return c.ID
+	id, _ := uuid.FromBytes(c.ID.Data)
+	return id
 }
