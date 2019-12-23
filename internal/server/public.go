@@ -57,7 +57,7 @@ func (s *Public) addMessageHandle() httprouter.Handle {
 
 		success := NewJsonSuccess(
 			struct {
-				ID *uuid.UUID `json:"uuid"`
+				ID *uuid.UUID `json:"id"`
 			}{
 				ID: msg.ID,
 			},
