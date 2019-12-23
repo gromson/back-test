@@ -108,3 +108,12 @@ func errorSliceToStringSlice(data []error) []string {
 
 	return ss
 }
+
+func New404(title string, detail interface{}) Response {
+	return &problem{
+		Type:   "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+		Title:  title,
+		Status: http.StatusNotFound,
+		Detail: detail,
+	}
+}

@@ -2,8 +2,10 @@ package server
 
 import (
 	"back-api/internal/message"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
 )
@@ -14,13 +16,13 @@ type Authenticator interface {
 
 type Private struct {
 	storage Storage
-	auth Authenticator
+	auth    Authenticator
 }
 
 func NewPrivateServer(storage Storage, auth Authenticator) *Private {
 	return &Private{
 		storage: storage,
-		auth: auth,
+		auth:    auth,
 	}
 }
 
@@ -66,6 +68,12 @@ func (s *Private) getMessageHandle() httprouter.Handle {
 		}
 
 		msg, err := s.storage.Get(id)
+
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			notFound := New404("Message not found", nil)
+			notFound.Respond(w, req)
+			return
+		}
 
 		if err != nil {
 			log.Println("error while trying to get a message from a storage: " + err.Error())
