@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 func CreateMongoClient(uri string) (*mongo.Client, error) {
@@ -19,7 +20,10 @@ func CreateMongoClient(uri string) (*mongo.Client, error) {
 		return nil, fmt.Errorf("couldn't create a mongoDB client: %w", err)
 	}
 
-	err = client.Connect(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	err = client.Connect(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("couldn't connect to MongoDB server: %w", err)
