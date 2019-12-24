@@ -32,13 +32,13 @@ to import of messages to the database on every start therefore it's recommended 
 run `docker-compose down` after stopping containers to remove them or modify an entrypoint
 for private service to `["./wait-for-it.sh", "mongo:27017", "--", "private", "--addr=:8081"]`.  
 
-# Documentation
+## Documentation
 
 For private and public api the following documentations provided:
 - [https://app.swaggerhub.com/apis-docs/gromson/back-test-private/1.0.0](https://app.swaggerhub.com/apis-docs/gromson/back-test-private/1.0.0) - Private API 
 - [https://app.swaggerhub.com/apis-docs/gromson/back-test-public/1.0.0](https://app.swaggerhub.com/apis-docs/gromson/back-test-public/1.0.0) - Public API
 
-# Test
+## Test
 
 Tests provided as an example for `back-api/internal/authentication` package and for 
 public server handler.
