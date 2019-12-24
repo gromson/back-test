@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  private:
+    build:
+      context: .
+      dockerfile: ./cmd/private/Dockerfile
+    ports:
+      - 8081:8081
+    environment:
+      - MONGODB_URI=mongodb://back:back12345@mongo:27017/?retryWrites=false
+      - MONGODB_DBNAME=romson-back
+    depends_on:
+      - mongo
+
+  public:
+    build:
+      context: .
+      dockerfile: ./cmd/public/Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - MONGODB_URI=mongodb://back:back12345@mongo:27017/?retryWrites=false
+      - MONGODB_DBNAME=romson-back
+    depends_on:
+      - mongo
+
+  mongo-admin-creator:
+    build:
+      context: .
+      dockerfile: ./deployments/mongo/Dockerfile
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=back
+      - MONGO_INITDB_ROOT_PASSWORD=back12345
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8082:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=back
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=back12345
