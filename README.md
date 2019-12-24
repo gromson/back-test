@@ -73,5 +73,5 @@ run in the goroutine.
 
 ### Database
 
-MongoDB was chosen only for challenge task purpose, not sure I'd been using it for the real
+MongoDB was chosen only for challenge task purpose, not sure I'd use it for the real
 life application.
