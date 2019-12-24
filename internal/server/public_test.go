@@ -47,7 +47,7 @@ func (s storageTest) Edit(id uuid.UUID, text string) error {
 }
 
 type successfulResponseTest struct {
-	ID uuid.UUID `json:"uuid"`
+	ID uuid.UUID `json:"id"`
 }
 
 var testCases = []struct {

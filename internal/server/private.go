@@ -27,10 +27,10 @@ func NewPrivateServer(storage Storage, auth Authenticator) *Private {
 }
 
 func (s *Private) Run(addr string) {
-	r := NewRouter()
+	r := newRouter()
 	r.PanicHandler = panicHandler
 
-	auth := r.NewGroup()
+	auth := r.newGroup()
 	auth.AddMiddleware(s.authMiddleware())
 
 	auth.GET("/", privateRootHandle)
@@ -113,7 +113,7 @@ func (s *Private) updateHandle() httprouter.Handle {
 	}
 }
 
-func (s *Private) authMiddleware() Middleware {
+func (s *Private) authMiddleware() middleware {
 	return func(next httprouter.Handle) httprouter.Handle {
 		return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 			user, password, ok := req.BasicAuth()

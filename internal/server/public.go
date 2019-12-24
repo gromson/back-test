@@ -18,7 +18,7 @@ func NewPublicServer(storage Storage) *Public {
 }
 
 func (s *Public) Run(addr string) {
-	r := NewRouter()
+	r := newRouter()
 	r.PanicHandler = panicHandler
 
 	r.GET("/", publicRootHandle)
