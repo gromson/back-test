@@ -65,3 +65,8 @@ application it should be more customized.
 
 Tests in this aplication have been provided as examples but in a real world application
 all handlers had to be covered by tests and most of the method in other services.
+
+### Messages import
+
+To start private server instantly, import of the big amount of messages can be considered to
+run in the goroutine.
