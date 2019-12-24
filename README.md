@@ -42,3 +42,5 @@ For private and public api the following documentations provided:
 
 Tests provided as an example for `back-api/internal/authentication` package and for 
 public server handler.
+
+Postman collection for testing endpoints: `/test/back.postman_collection.json` 
