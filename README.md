@@ -27,8 +27,18 @@ Private API can be accessed via [http://localhost:8081](http://localhost:8081)
 
 Mongo-Express can be accessed via [http://localhost:8082](http://localhost:8082)
 
+NOTE: docker-compose always starts private server with `--import` flag which will lead
+to import of messages to the database on every start therefore it's recommended to
+run `docker-compose down` after stopping containers to remove them or modify an entrypoint
+for private service to `["./wait-for-it.sh", "mongo:27017", "--", "private", "--addr=:8081"]`.  
+
 # Documentation
 
 For private and public api the following documentations provided:
 - [https://app.swaggerhub.com/apis-docs/gromson/back-test-private/1.0.0](https://app.swaggerhub.com/apis-docs/gromson/back-test-private/1.0.0) - Private API 
 - [https://app.swaggerhub.com/apis-docs/gromson/back-test-public/1.0.0](https://app.swaggerhub.com/apis-docs/gromson/back-test-public/1.0.0) - Public API
+
+# Test
+
+Tests provided as an example for `back-api/internal/authentication` package and for 
+public server handler.
