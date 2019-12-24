@@ -13,7 +13,10 @@ the following addresses:
 Access to the private API is protected with a basic authentication.
 Credentials `admin:back-challenge`.
 
-The project uses https://travis-ci.org as a CI/CD tool. 
+The project uses https://travis-ci.org as a CI/CD tool.
+
+NOTE: The first call to heroku app can be slow because free nodes fall asleep
+after 30 minutes idle.
 
 ## Run locally
 
