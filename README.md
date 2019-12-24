@@ -70,3 +70,8 @@ all handlers had to be covered by tests and most of the method in other services
 
 To start private server instantly, import of the big amount of messages can be considered to
 run in the goroutine.
+
+### Database
+
+MongoDB was chosen only for challenge task purpose, not sure I'd been using it for the real
+life application.
