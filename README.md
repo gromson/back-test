@@ -46,4 +46,22 @@ For private and public api the following documentations provided:
 Tests provided as an example for `back-api/internal/authentication` package and for 
 public server handler.
 
-Postman collection for testing endpoints: `/test/back.postman_collection.json` 
+Postman collection for testing endpoints: `/test/back.postman_collection.json`
+
+## Trade-offs 
+
+### Security
+
+Each endpoint in private API is protected with basic authentication however, in the real life
+application it would make sense to have a dedicated authentication service that provides
+authorization token. Based on that token access to particular endpoints could be granted.
+
+### CI/CD
+
+In this challenge task quite simple CI/CD pipeline has been set up whereas, in a real world
+application it should be more customized.
+
+### Tests
+
+Tests in this aplication have been provided as examples but in a real world application
+all handlers had to be covered by tests and most of the method in other services.
